@@ -12,7 +12,6 @@ use \GuzzleHttp\ClientInterface as GuzzleClientInterface;
 
 class Client
 {
-
     const API_URL = 'https://api.untappd.com/v4';
     const CONTENT_TYPE_JSON = 'application/json; charset=utf-8';
 
@@ -68,13 +67,31 @@ class Client
      */
     public function getBreweryInfo(int $breweryId)
     {
-        return $this->client->request('GET', self::API_URL.'/brewery/info/'.(string) $breweryId, [
+        return $this->client->request('GET', self::API_URL . '/brewery/info/' . (string)$breweryId, [
             'headers' => [
                 'Accept' => self::CONTENT_TYPE_JSON
             ],
             'query' => [
                 'client_id' => $this->clientId,
                 'client_secret' => $this->clientSecret,
+            ]
+        ]);
+    }
+
+    /**
+     * @param string $searchString
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function searchBrewery(string $searchString)
+    {
+        return $this->client->request('GET', self::API_URL.'/search/brewery/', [
+            'headers' => [
+                'Accept' => self::CONTENT_TYPE_JSON
+            ],
+            'query' => [
+                'client_id' => $this->clientId,
+                'client_secret' => $this->clientSecret,
+                'q' => $searchString
             ]
         ]);
     }

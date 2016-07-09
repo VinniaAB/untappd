@@ -8,7 +8,7 @@ $client = Client::make($env['client_id'], $env['client_secret']);
 $data = [];
 
 if ($_POST) {
-    $res = $client->getBreweryInfo($_POST['brewery_id']);
+    $res = $client->searchBrewery($_POST['searchString']);
     $data = json_decode((string) $res->getBody(), true);
 }
 
@@ -33,10 +33,10 @@ if ($_POST) {
 <body>
 
     <div class="container">
-        <h1>Package tracker</h1>
+        <h1>Search Brewery</h1>
 
         <?php if ($data): ?>
-            Info for <strong><?php echo $_POST['brewery_id']; ?></strong>
+            Info for <strong><?php echo $_POST['searchString']; ?></strong>
 
             <?php
             //TODO: Nicer presentation
@@ -50,12 +50,12 @@ if ($_POST) {
         <form method="post" action="">
             <input class="form-control"
                    type="text"
-                   name="brewery_id"
-                   placeholder="Brewery ID" />
+                   name="searchString"
+                   placeholder="Brewery Name" />
 
             <br />
 
-            <button class="btn btn-primary">Get brewery info</button>
+            <button class="btn btn-primary">Search for brewery</button>
         </form>
     </div>
 
