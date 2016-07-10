@@ -42,7 +42,7 @@ class Client
      * @param $clientSecret
      * @param $accessToken
      */
-    function __construct(GuzzleClientInterface $client, $clientId, $clientSecret, $accessToken = null)
+    function __construct(GuzzleClientInterface $client, $clientId, $clientSecret, $accessToken = '')
     {
         $this->client = $client;
         $this->clientId = $clientId;
@@ -67,15 +67,14 @@ class Client
      */
     public function getBreweryInfo(int $breweryId)
     {
-        return $this->client->request('GET', self::API_URL . '/brewery/info/' . (string)$breweryId, [
-            'headers' => [
-                'Accept' => self::CONTENT_TYPE_JSON
-            ],
-            'query' => [
-                'client_id' => $this->clientId,
-                'client_secret' => $this->clientSecret,
-            ]
-        ]);
+        $options = $this->getStandardHeaders();
+        return $this->client->request('GET', self::API_URL . '/brewery/info/' . (string)$breweryId, $options);
+    }
+
+    public function getBeers($username = '')
+    {
+        $options = $this->getStandardHeaders();
+        return $this->client->request('GET', self::API_URL.'/user/beers/'. (string)$username, $options);
     }
 
     /**
@@ -84,16 +83,38 @@ class Client
      */
     public function searchBrewery(string $searchString)
     {
-        return $this->client->request('GET', self::API_URL.'/search/brewery/', [
+        $options = array_merge_recursive([
+            'query' => [
+                'q' => $searchString
+            ]
+        ], $this->getStandardHeaders());
+
+        return $this->client->request('GET', self::API_URL.'/search/brewery', $options);
+    }
+
+    private function getStandardHeaders()
+    {
+        if (! empty($this->accessToken)) {
+            return [
+                'headers' => [
+                    'Accept' => self::CONTENT_TYPE_JSON
+                ],
+                'query' => [
+                    'access_token' => $this->accessToken,
+                ]
+            ];
+        }
+
+
+        return [
             'headers' => [
                 'Accept' => self::CONTENT_TYPE_JSON
             ],
             'query' => [
                 'client_id' => $this->clientId,
-                'client_secret' => $this->clientSecret,
-                'q' => $searchString
+                'client_secret' => $this->clientSecret
             ]
-        ]);
+        ];
     }
 
 }

@@ -9,4 +9,5 @@
 return [
     'client_id' => 'client-id',
     'client_secret' => 'some-client-secret',
+    'access_token' => 'authenticated token'
 ];
