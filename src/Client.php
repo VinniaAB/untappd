@@ -14,6 +14,7 @@ class Client
 {
     const API_URL = 'https://api.untappd.com/v4';
     const CONTENT_TYPE_JSON = 'application/json; charset=utf-8';
+    const ELEMENTS_PER_REQUEST = 25;
 
     /**
      * @var GuzzleClientInterface
@@ -71,10 +72,38 @@ class Client
         return $this->client->request('GET', self::API_URL . '/brewery/info/' . (string)$breweryId, $options);
     }
 
-    public function getBeers($username = '')
+    /**
+     * @param string $username
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function getUserBeers($username = '')
     {
         $options = $this->getStandardHeaders();
         return $this->client->request('GET', self::API_URL.'/user/beers/'. (string)$username, $options);
+    }
+
+    /**
+     * @param $breweryId
+     * @return \Psr\Http\Message\ResponseInterface[]
+     */
+    public function getBreweryBeers($breweryId)
+    {
+        $options = $this->getStandardHeaders();
+        $options = array_merge_recursive($options, [
+           'query' => [
+               'offset' => 0
+           ]
+        ]);
+        $totalPages = 1;
+        $result = [];
+        for($i = 0; $i < $totalPages; $i++) {
+            $response = $this->client->request('GET', self::API_URL.'/brewery/beer_list/'. (string)$breweryId, $options);
+            $decoded_response = json_decode((string) $response->getBody(), $assoc = true);
+            $totalPages = ceil($decoded_response['response']['beer_count'] / self::ELEMENTS_PER_REQUEST);
+            $result[] = $response;
+            $options['query']['offset'] += self::ELEMENTS_PER_REQUEST;
+        }
+        return $result;
     }
 
     /**
@@ -92,6 +121,9 @@ class Client
         return $this->client->request('GET', self::API_URL.'/search/brewery', $options);
     }
 
+    /**
+     * @return array
+     */
     private function getStandardHeaders()
     {
         if (! empty($this->accessToken)) {
